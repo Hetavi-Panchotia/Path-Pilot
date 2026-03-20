@@ -42,7 +42,7 @@ exports.analyzeGap = async (req, res) => {
     res.json(analysis);
   } catch (error) {
     console.error('Analysis Error:', error);
-    res.status(500).json({ error: 'Failed to analyze gap.' });
+    res.status(500).json({ error: error.message || 'Failed to analyze gap.' });
   }
 };
 
@@ -57,7 +57,7 @@ exports.generateRoadmap = async (req, res) => {
     res.json(roadmap);
   } catch (error) {
     console.error('Roadmap Error:', error);
-    res.status(500).json({ error: 'Failed to generate roadmap.' });
+    res.status(500).json({ error: error.message || 'Failed to generate roadmap.' });
   }
 };
 
@@ -68,6 +68,6 @@ exports.chatAssistant = async (req, res) => {
     res.json({ reply });
   } catch (error) {
     console.error('Chat Error:', error);
-    res.status(500).json({ error: 'Failed to get chat reply.' });
+    res.status(500).json({ error: error.message || 'Failed to get chat reply.' });
   }
 };

@@ -2,9 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 
-// Load environment variables from the root folder
-dotenv.config({ path: '../.env' }); 
-
+// Load environment variables
+dotenv.config(); // Loads from ./backend/.env
+dotenv.config({ path: '../.env' }); // Fallback to root .env
 const app = express();
 const PORT = process.env.PORT || 5005;
 

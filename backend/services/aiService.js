@@ -47,7 +47,11 @@ exports.performGapAnalysis = async (resumeText, jdText) => {
     response_format: { type: 'json_object' }
   });
 
-  return JSON.parse(response.choices[0].message.content);
+  let content = response.choices[0].message.content.trim();
+  if (content.startsWith('```')) {
+    content = content.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim();
+  }
+  return JSON.parse(content);
 };
 
 exports.createLearningRoadmap = async (analysis) => {
@@ -84,7 +88,11 @@ exports.createLearningRoadmap = async (analysis) => {
     response_format: { type: 'json_object' }
   });
 
-  return JSON.parse(response.choices[0].message.content);
+  let content = response.choices[0].message.content.trim();
+  if (content.startsWith('```')) {
+    content = content.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim();
+  }
+  return JSON.parse(content);
 };
 
 exports.getChatReply = async (message, context) => {
