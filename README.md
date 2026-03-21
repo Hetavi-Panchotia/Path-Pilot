@@ -1,79 +1,104 @@
 # 🚀 PathPilot AI
 
-### Adaptive AI Onboarding & Skill Gap Analyzer
+### Adaptive Skill Gap Analyzer & Learning Roadmap Generator
 
 ---
 
 ## 📌 Overview
 
-**PathPilot AI** is an AI-powered onboarding engine that analyzes a candidate’s **Resume** against a **Job Description** to identify skill gaps and generate a **personalized learning roadmap**.
+**PathPilot AI** is a modern AI-powered web application that analyzes a user's **skills (via resume text)** against a **target job description** and generates a **personalized learning roadmap**.
 
-It replaces traditional one-size-fits-all onboarding with a **dynamic, adaptive learning experience**, helping users become job-ready faster.
+Unlike traditional onboarding systems, PathPilot uses a **text-based input approach** (no file uploads or OCR) to ensure **speed, reliability, and accuracy**.
 
 ---
 
 ## ✨ Features
 
-* 📂 Upload Resume (**PDF / Image**)
-* 📝 Input Job Description (text or file)
-* 🧠 AI-powered **skill extraction & normalization**
-* ⚖️ **Skill Gap Analysis**
+* 📝 Paste Resume (text input)
+* 📄 Paste Job Description
+* 🧠 AI-powered **skill extraction**
+* ⚖️ Accurate **Skill Gap Analysis**
 
   * Matched Skills ✅
   * Missing Skills ❌
   * Weak Skills ⚠️
 * 📊 **Job Readiness Score (%)**
+* 📈 Animated **Progress Bar**
 * 🗺️ Personalized **Learning Roadmap**
-* 📈 **Progress Tracking System**
-
-  * Step completion
-  * Dynamic progress bar
-* 🤖 AI Chat Assistant (context-aware)
-* 🎨 Modern UI with animations & dark/light mode
+* 🎨 Modern UI with animations & dark mode
+* ⚡ Fast performance (no OCR delays)
 
 ---
 
 ## 🧠 How It Works (Skill Gap Logic)
 
-1. **Document Parsing**
+### 1. Input
 
-   * Resume (PDF/Image) → text extraction
-   * OCR used for image processing
+* User pastes:
 
-2. **Skill Extraction**
+  * Resume content
+  * Job Description
 
-   * AI extracts:
+---
 
-     * Skills
-     * Tools
-     * Experience level
+### 2. Skill Extraction
 
-3. **Job Description Analysis**
+* AI extracts:
 
-   * Required skills and priorities identified
+  * Skills
+  * Tools
+  * Technologies
 
-4. **Skill Gap Analysis**
+---
 
-   * Compare:
+### 3. Skill Normalization
 
-     * Resume Skills vs JD Skills
-   * Output:
+To ensure accurate comparison:
 
-     * Matched Skills
-     * Missing Skills
-     * Weak Skills
+* Convert to lowercase
+* Remove special characters
+* Trim whitespace
 
-5. **Readiness Score**
+Example:
 
-   * Calculated based on overlap and skill weightage
+* "Node.js" → "nodejs"
+* "React JS" → "reactjs"
 
-6. **Roadmap Generation**
+---
 
-   * AI generates:
+### 4. Skill Gap Analysis
 
-     * Step-by-step learning path
-     * Time estimates
-     * Resources & projects
+The system compares:
+
+* Resume Skills vs Job Description Skills
+
+Outputs:
+
+* ✅ Matched Skills → present in both
+* ❌ Missing Skills → required but not present
+* ⚠️ Weak Skills → optional enhancement
+
+---
+
+### 5. Readiness Score Calculation
+
+```bash
+readinessScore = (matchedSkills / totalJDskills) * 100
+```
+
+* Rounded to nearest integer
+* Safe handling for edge cases
+
+---
+
+### 6. Roadmap Generation
+
+AI generates:
+
+* Step-by-step learning plan
+* Estimated duration
+* Resources (docs, tutorials)
+* Mini project suggestions
 
 ---
 
@@ -90,13 +115,10 @@ It replaces traditional one-size-fits-all onboarding with a **dynamic, adaptive 
 
 * Node.js
 * Express.js
-* Multer (file uploads)
 
-### AI & Processing
+### AI Integration
 
 * OpenAI API
-* Tesseract.js (OCR for images)
-* pdf-parse (PDF text extraction)
 
 ---
 
@@ -119,12 +141,11 @@ root/
 │   ├── controllers/
 │   ├── routes/
 │   ├── services/
-│   │   ├── aiService.js
-│   │   ├── ocrService.js
+│   │   └── aiService.js
 │   │
 │   ├── utils/
-│   │   ├── pdfParser.js
-│   │   └── textCleaner.js
+│   │   ├── skillNormalizer.js
+│   │   └── parser.js
 │   │
 │   ├── server.js
 │   └── package.json
@@ -139,7 +160,7 @@ root/
 
 ## ⚙️ Setup Instructions
 
-### 1. Clone the Repository
+### 1. Clone Repository
 
 ```bash
 git clone https://github.com/your-username/pathpilot-ai.git
@@ -148,7 +169,7 @@ cd pathpilot-ai
 
 ---
 
-### 2. Setup Backend
+### 2. Backend Setup
 
 ```bash
 cd backend
@@ -157,8 +178,8 @@ npm install
 
 Create `.env` file:
 
-```env
-OPENAI_API_KEY=your_api_key_here
+```
+OPENAI_API_KEY=your_api_key
 PORT=5000
 ```
 
@@ -170,7 +191,7 @@ npm run dev
 
 ---
 
-### 3. Setup Frontend
+### 3. Frontend Setup
 
 ```bash
 cd frontend
@@ -180,29 +201,18 @@ npm run dev
 
 ---
 
-### 4. Open in Browser
+### 4. Open App
 
 ```
-http://localhost:5173
-```
-
----
-
-## 🐳 Docker (Optional)
-
-```bash
-docker build -t pathpilot-ai .
-docker run -p 5000:5000 pathpilot-ai
+https://path-pilot-cyan.vercel.app/
 ```
 
 ---
 
 ## 🔐 Environment Variables
 
-Create a `.env` file in backend:
-
 ```
-OPENAI_API_KEY=your_api_key
+VITE_API_URL=https://path-pilot-7p4c.onrender.com/api
 PORT=5000
 ```
 
@@ -212,11 +222,11 @@ PORT=5000
 
 ### Frontend
 
-* Deploy on **Vercel**
+* Vercel
 
 ### Backend
 
-* Deploy on **Render / Railway**
+* Render / Railway
 
 ---
 
@@ -227,32 +237,42 @@ node_modules/
 .env
 dist/
 build/
-uploads/
 *.log
 .DS_Store
 ```
 
 ---
 
-## 💡 Future Enhancements
+## 💡 Key Improvements (Updated Version)
+
+* ❌ Removed OCR & file uploads
+* ✅ Switched to **text-based input**
+* ⚡ Faster and more reliable processing
+* 🧠 Improved skill matching logic
+* 📊 Accurate readiness scoring
+
+---
+
+## 🔮 Future Enhancements
 
 * 📄 Export roadmap as PDF
 * 📊 Advanced analytics dashboard
-* 👥 Team onboarding support
-* 🧪 Skill assessment quizzes
-* ☁️ Cloud storage integration
+* 🧪 Skill quizzes
+* 💾 Save user history
 
 ---
 
 ## 👩‍💻 Authors
 
-* **Hetavi Panchotia**
-* **Kreya Panchal**
+* Hetavi Panchotia
+* Priya
+* Nandiniben Prajapati
+* Dhruvi Patel
 
 ---
 
 ## 🎯 One-Line Pitch
 
-> PathPilot AI intelligently maps your current skills to your dream role and generates a personalized roadmap to get you there faster.
+> PathPilot AI analyzes your current skills and intelligently guides you with a personalized roadmap to become job-ready faster.
 
 ---
