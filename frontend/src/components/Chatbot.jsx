@@ -21,12 +21,12 @@ const Chatbot = () => {
     setLoading(true);
 
     try {
-      // Chatbot call: ensure /api suffix
-      let apiUrl = import.meta.env.VITE_API_URL || '/api';
+      // Chatbot call: ensure /api suffix with hardcoded fallback
+      let apiUrl = import.meta.env.VITE_API_URL || 'https://path-pilot-7p4c.onrender.com/api';
       apiUrl = apiUrl.replace(/\/$/, ''); // Remove trailing slash
       
-      // If it's an external URL and doesn't end with /api, append it
-      if (apiUrl.startsWith('http') && !apiUrl.endsWith('/api')) {
+      // If it doesn't end with /api, append it
+      if (!apiUrl.endsWith('/api')) {
         apiUrl += '/api';
       }
 
@@ -34,6 +34,7 @@ const Chatbot = () => {
         message: userMsg,
         context: { analysisResult, roadmap }
       });
+
 
       
       setMessages(prev => [...prev, { role: 'assistant', content: res.data.reply }]);
