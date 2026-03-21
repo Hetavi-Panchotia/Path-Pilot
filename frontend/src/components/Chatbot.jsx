@@ -21,11 +21,20 @@ const Chatbot = () => {
     setLoading(true);
 
     try {
-      const baseApiUrl = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
-      const res = await axios.post(`${baseApiUrl}/chat`, {
+      // Chatbot call: ensure /api suffix
+      let apiUrl = import.meta.env.VITE_API_URL || '/api';
+      apiUrl = apiUrl.replace(/\/$/, ''); // Remove trailing slash
+      
+      // If it's an external URL and doesn't end with /api, append it
+      if (apiUrl.startsWith('http') && !apiUrl.endsWith('/api')) {
+        apiUrl += '/api';
+      }
+
+      const res = await axios.post(`${apiUrl}/chat`, {
         message: userMsg,
         context: { analysisResult, roadmap }
       });
+
       
       setMessages(prev => [...prev, { role: 'assistant', content: res.data.reply }]);
     } catch (error) {
