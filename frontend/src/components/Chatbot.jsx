@@ -21,18 +21,19 @@ const Chatbot = () => {
     setLoading(true);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || '/api';
-      const res = await axios.post(`${apiUrl}/chat`, {
+      const baseApiUrl = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
+      const res = await axios.post(`${baseApiUrl}/chat`, {
         message: userMsg,
         context: { analysisResult, roadmap }
       });
-
       
       setMessages(prev => [...prev, { role: 'assistant', content: res.data.reply }]);
     } catch (error) {
       console.error(error);
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error answering that.' }]);
+      const errorMsg = error.response?.data?.error || 'Sorry, I encountered an error answering that.';
+      setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
     } finally {
+
       setLoading(false);
     }
   };

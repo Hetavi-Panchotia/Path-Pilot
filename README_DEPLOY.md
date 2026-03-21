@@ -35,12 +35,18 @@ npm start
 The backend will automatically find the `dist` folder and serve the frontend UI.
 
 ### 3. Environment Variables
-Ensure the following variables are set on your deployment platform:
+Ensure the following variables are set on your deployment platforms:
+
+**On Render (Backend):**
 - `PORT`: `10000` (Render's default) or any port you prefer.
-- `VITE_API_URL`: `/api` (Defaults to `/api` which is recommended for unified serving).
+
+**On Vercel (Frontend):**
+- `VITE_API_URL`: Your full Render backend URL followed by `/api` (e.g., `https://path-pilot-7p4c.onrender.com/api`).
+  - *Note: Don't forget the `/api` at the end!*
 
 ## Summary of Robustness Changes
 - **Root Orchestration**: `package.json` at the root handles unified installs and builds for both frontend and backend.
 - **Robust Pathing**: `server.js` now searches for the `dist` folder relatively, which adapts to different deployment structures.
-- **Fail-safe Fallback**: If the build is missing, the server will now provide a clear 404 error message instead of crashing.
+- **Improved API Logic**: The frontend now automatically handles trailing slashes and provides better error messages if the backend is unreachable.
+
 

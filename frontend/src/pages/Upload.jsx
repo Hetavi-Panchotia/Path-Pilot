@@ -18,11 +18,12 @@ const Upload = () => {
     setLoading(true);
     try {
       // Single API call for Gap Analysis & Roadmap
-      const apiUrl = import.meta.env.VITE_API_URL || '/api';
-      const res = await axios.post(`${apiUrl}/analyze`, {
+      const baseApiUrl = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
+      const res = await axios.post(`${baseApiUrl}/analyze`, {
         resumeText,
         jdText
       });
+
 
       
       const analysisData = res.data;
@@ -34,10 +35,14 @@ const Upload = () => {
     } catch (error) {
       console.error(error);
       if (error.message === 'Network Error') {
-        alert('Network Error: Cannot connect to the backend server. Please refresh your browser and ensure the backend is running on port 5005.');
+        alert('Network Error: Cannot connect to the backend server. Please check your internet connection.');
+      } else if (error.response) {
+        alert(error.response.data?.error || `Server Error: ${error.response.status}. Please check your backend deployment.`);
       } else {
-        alert(error.response?.data?.error || 'An error occurred during analysis.');
+        alert('An error occurred during analysis. Please check your internet connection and backend status.');
       }
+
+
     } finally {
       setLoading(false);
     }
