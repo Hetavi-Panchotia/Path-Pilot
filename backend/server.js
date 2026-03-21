@@ -16,7 +16,15 @@ app.use(cors());
 app.use(express.json());
 
 // Serve static files from the frontend build folder
-app.use(express.static(path.join(__dirname, '../frontend/dist')));
+const frontendPath = path.join(__dirname, '../frontend/dist');
+const localPublicPath = path.join(__dirname, 'public');
+
+if (require('fs').existsSync(frontendPath)) {
+  app.use(express.static(frontendPath));
+} else if (require('fs').existsSync(localPublicPath)) {
+  app.use(express.static(localPublicPath));
+}
+
 
 
 // Routes
@@ -25,8 +33,17 @@ app.use('/api', apiRoutes);
 
 // Fallback for Single Page Application (SPA) routing
 app.use((req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/dist', 'index.html'));
+  const indexFile = require('fs').existsSync(path.join(frontendPath, 'index.html')) 
+    ? path.join(frontendPath, 'index.html') 
+    : path.join(localPublicPath, 'index.html');
+    
+  if (require('fs').existsSync(indexFile)) {
+    res.sendFile(indexFile);
+  } else {
+    res.status(404).send('Frontend build not found. Please run "npm run build" in the frontend directory.');
+  }
 });
+
 
 
 
