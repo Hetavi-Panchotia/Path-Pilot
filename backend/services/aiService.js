@@ -1,117 +1,65 @@
-const OpenAI = require('openai');
-
-let openai;
-try {
-  openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-} catch (e) {
-  console.warn("OpenAI API key is missing. AI Features will not work until it is configured.");
-}
-
-const checkKeys = () => {
-  if (!openai || !process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
-    throw new Error("OpenAI API Key is missing. Please configure OPENAI_API_KEY in the .env file.");
-  }
+// Helper for skills normalization: Lowercase, trim
+const normalize = (skill) => {
+  if (typeof skill !== 'string') return '';
+  return skill.toLowerCase().trim();
 };
 
 exports.performGapAnalysis = async (resumeText, jdText) => {
-  checkKeys();
-  const prompt = `
-    You are an expert technical recruiter and career coach.
-    I will provide you with a candidate's Resume text and a Job Description text.
-    Your task is to analyze them and extract:
-    1. A normalized list of skills the candidate has.
-    2. A Job Readiness Score (0-100%).
-    3. Categorize the required skills into: Matched Skills, Missing Skills, and Weak Skills.
+  // 1. Pre-process texts: Split by comma and normalize
+  const tokenize = (text) => text.split(',').map(normalize).filter(t => t.length > 0);
+  
+  // Create unique sets of skills
+  const resumeSkillsArray = tokenize(resumeText);
+  const jdSkillsArray = tokenize(jdText);
+  
+  const resumeSkillsSet = new Set(resumeSkillsArray);
+  const jdSkillsSet = new Set(jdSkillsArray);
 
-    Return the result STRICTLY as a JSON object with this structure:
-    {
-      "readinessScore": 85,
-      "matchedSkills": ["React", "Node.js"],
-      "missingSkills": ["AWS", "Docker"],
-      "weakSkills": ["Python"]
-    }
+  // 2. Identify matches (Case-insensitive comparison via normalization)
+  // We'll use the original formatting for display if possible, but for comparison we use the normalized versions.
+  // To keep it simple, we'll just use the normalized versions for everything since the user is providing them.
+  
+  const matchedSkills = jdSkillsArray.filter(skill => resumeSkillsSet.has(skill));
+  const missingSkills = jdSkillsArray.filter(skill => !resumeSkillsSet.has(skill));
+  
+  // Avoid duplicates in the final list (if user input same skill multiple times)
+  const uniqueMatched = [...new Set(matchedSkills)];
+  const uniqueMissing = [...new Set(missingSkills)];
 
-    Resume:
-    ${resumeText}
+  const readinessScore = jdSkillsArray.length > 0 
+    ? Math.round((matchedSkills.length / jdSkillsArray.length) * 100) 
+    : 0;
 
-    Job Description:
-    ${jdText}
-  `;
+  const weakSkills = []; // For this simple logic, we don't have "weak" skills, only matched or missing.
 
-  const response = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
-    messages: [{ role: 'user', content: prompt }],
-    temperature: 0.2,
-    response_format: { type: 'json_object' }
-  });
+  const roadmap = uniqueMissing.map((skill, index) => ({
+    id: index + 1,
+    skill: skill.charAt(0).toUpperCase() + skill.slice(1), // Capitalize for display
+    duration: '2-4 weeks',
+    resources: [
+      `Learn ${skill} on YouTube`,
+      `Official ${skill} Documentation`
+    ],
+    project: `Build a small application using ${skill}`
+  }));
 
-  let content = response.choices[0].message.content.trim();
-  if (content.startsWith('```')) {
-    content = content.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim();
-  }
-  return JSON.parse(content);
-};
-
-exports.createLearningRoadmap = async (analysis) => {
-  checkKeys();
-  const prompt = `
-    You are an expert technical career coach.
-    Based on the following skill gap analysis, create a structured and personalized learning roadmap for the candidate to acquire the missing and weak skills.
-    
-    Analysis data:
-    ${JSON.stringify(analysis)}
-
-    Return the result STRICTLY as a JSON object with this structure:
-    {
-      "roadmap": [
-        {
-          "id": 1,
-          "skill": "AWS",
-          "title": "Learn AWS Basics",
-          "duration": "2 weeks",
-          "difficulty": "Beginner",
-          "resources": [
-            { "name": "AWS Certified Cloud Practitioner (YouTube)", "url": "https://youtube.com/..." }
-          ],
-          "miniProject": "Deploy a static site to S3"
-        }
-      ]
-    }
-  `;
-
-  const response = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
-    messages: [{ role: 'user', content: prompt }],
-    temperature: 0.2,
-    response_format: { type: 'json_object' }
-  });
-
-  let content = response.choices[0].message.content.trim();
-  if (content.startsWith('```')) {
-    content = content.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim();
-  }
-  return JSON.parse(content);
+  return {
+    matchedSkills: uniqueMatched.map(s => s.charAt(0).toUpperCase() + s.slice(1)),
+    missingSkills: uniqueMissing.map(s => s.charAt(0).toUpperCase() + s.slice(1)),
+    weakSkills,
+    readinessScore,
+    roadmap
+  };
 };
 
 exports.getChatReply = async (message, context) => {
-  checkKeys();
-  const prompt = `
-    You are an AI learning assistant for a candidate. 
-    Here is the context of their current skill analysis and learning roadmap:
-    ${JSON.stringify(context)}
-
-    The user says: "${message}"
-
-    Respond concisely and helpfully, tailoring your advice to the context above.
-  `;
-
-  const response = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
-    messages: [{ role: 'user', content: prompt }],
-    temperature: 0.7,
-  });
-
-  return response.choices[0].message.content;
+  const msg = message.toLowerCase();
+  if (msg.includes('how') || msg.includes('roadmap') || msg.includes('step')) {
+    return "The roadmap I generated focuses on your missing skills. You should start with the first step and build a small project to solidify your learning.";
+  }
+  if (msg.includes('score') || msg.includes('readiness')) {
+    return `Your current readiness score is ${context.readinessScore}%. Adding more skills from the job description to your resume will increase this score.`;
+  }
+  return "I'm here to help you bridge your skill gaps. Focus on the missing skills in your roadmap to become more ready for this role!";
 };
+

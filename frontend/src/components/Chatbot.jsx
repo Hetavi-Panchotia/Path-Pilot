@@ -21,10 +21,12 @@ const Chatbot = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post('http://localhost:5005/api/chat', {
+      const apiUrl = import.meta.env.VITE_API_URL || '/api';
+      const res = await axios.post(`${apiUrl}/chat`, {
         message: userMsg,
         context: { analysisResult, roadmap }
       });
+
       
       setMessages(prev => [...prev, { role: 'assistant', content: res.data.reply }]);
     } catch (error) {
